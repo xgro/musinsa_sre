@@ -1,5 +1,7 @@
+import csv
+import io
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 import aioboto3  # type: ignore
 from botocore.exceptions import ClientError
@@ -43,95 +45,92 @@ class IAMService:
                 for key in access_keys["AccessKeyMetadata"]:
                     if key["CreateDate"] < threshold:
                         old_keys.append(
-                            {
-                                "user_name": user["UserName"],
-                                "access_key_id": key["AccessKeyId"],
-                                "created_date": key["CreateDate"],
-                            },
+                            OldAccessKey(
+                                user_name=user["UserName"],
+                                access_key_id=key["AccessKeyId"],
+                                created_date=key["CreateDate"],
+                            ),
                         )
 
-            return [OldAccessKey(**item) for item in old_keys]
+            return old_keys
 
     async def get_old_access_keys_from_credential_report(
         self,
         hours: int,
     ) -> List[OldAccessKey]:
-        """Credential Report에서 N시간 이상된 AWS Access Key 목록을 페이지네이션하여 반환
+        """Credential Report에서 N시간 이상된 AWS Access Key 목록을 반환
 
         :param hours: 조회할 시간
         :return: 조회된 Access Key 목록
         """
-        # if not self.credential_report:
         await self._generate_credential_report()
-        self.credential_report = await self._get_credential_report()
+        credential_report = await self._get_credential_report()
+        return self._parse_credential_report(credential_report, hours)
 
-        # logger.info(f"Credential Report created: {self.credential_report}")
-
-        return await self._parse_credential_report(self.credential_report, hours)
-
-    async def _parse_credential_report(
+    def _parse_credential_report(
         self,
-        credential_report: str,
+        credential_report: bytes,
         hours: int,
     ) -> List[OldAccessKey]:
-        """Credential Report를 파싱하여 N시간 이상된 Access Key 목록을 반환"""
-        import csv
-        import io
-        from datetime import datetime, timedelta, timezone
+        """Credential Report를 파싱하여 N시간 이상된 Access Key 목록을 반환
 
-        # credential_report가 bytes라면 디코딩
-        if isinstance(credential_report, bytes):
-            csv_str = credential_report.decode("utf-8")
-        else:
-            csv_str = credential_report
+        :param credential_report: Credential Report
+        :param hours: 조회할 시간
+        :return: 조회된 Access Key 목록
+        """
+        # credential_report를 문자열로 변환
+        csv_str = credential_report.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(csv_str))
 
-        csv_file = io.StringIO(csv_str)
-        reader = csv.DictReader(csv_file)
-
+        # 현재 시간에서 hours만큼 빼서 임계값 설정
         threshold = datetime.now(timezone.utc) - timedelta(hours=hours)
         old_keys = []
         for row in reader:
             user_name = row["user"]
+            # 루트 계정은 무시
             if user_name == "<root_account>":
                 continue
-            # access_key_1
-            if row["access_key_1_active"] == "true":
-                key_id = "access_key_1"
-                created_str = row["access_key_1_last_rotated"]
-                if created_str and created_str != "N/A":
-                    created_date = datetime.strptime(
-                        created_str,
-                        "%Y-%m-%dT%H:%M:%SZ",
-                    ).replace(tzinfo=timezone.utc)
-                    if created_date < threshold:
-                        old_keys.append(
-                            OldAccessKey(
-                                user_name=user_name,
-                                access_key_id=key_id,
-                                created_date=created_date,
-                            ),
-                        )
-            # access_key_2
-            if row["access_key_2_active"] == "true":
-                key_id = "access_key_2"
-                created_str = row["access_key_2_last_rotated"]
-                if created_str and created_str != "N/A":
-                    created_date = datetime.strptime(
-                        created_str,
-                        "%Y-%m-%dT%H:%M:%SZ",
-                    ).replace(tzinfo=timezone.utc)
-                    if created_date < threshold:
-                        old_keys.append(
-                            OldAccessKey(
-                                user_name=user_name,
-                                access_key_id=key_id,
-                                created_date=created_date,
-                            ),
-                        )
+
+            # access_key_1과 access_key_2를 조회
+            for idx in [1, 2]:
+                # access_key가 비활성화되어 있으면 루프 패스
+                if row[f"access_key_{idx}_active"] != "true":
+                    logger.info(f"Access key {idx} is not active for user {user_name}.")
+                    continue
+
+                # access_key가 마지막으로 생성된 시간을 조회
+                created_str = row[f"access_key_{idx}_last_rotated"]
+                created_date = self._parse_datetime(created_str)
+
+                # 임계값보다 오래 전에 생성된 경우 old_keys 배열에 추가
+                if created_date and created_date < threshold:
+                    old_keys.append(
+                        OldAccessKey(
+                            user_name=user_name,
+                            access_key_id=f"access_key_{idx}",
+                            created_date=created_date,
+                        ),
+                    )
         return old_keys
 
+    @staticmethod
+    def _parse_datetime(dt_str: str) -> Optional[datetime]:
+        """datetime 문자열을 datetime 객체로 변환
+
+        :param dt_str: datetime 문자열
+        :return: datetime 객체
+        """
+        if not dt_str or dt_str == "N/A":
+            return None
+        return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc,
+        )
+
     async def _generate_credential_report(self) -> None:
-        """Credential Report를 생성"""
+        """Credential Report를 생성
+
+        :return: None
+        """
         try:
             async with self.session.client("iam") as client:  # type: ignore
                 response = await client.generate_credential_report()
@@ -142,10 +141,8 @@ class IAMService:
         except ClientError:
             logger.exception("Couldn't generate a credentials report for your account.")
             raise
-        else:
-            return response
 
-    async def _get_credential_report(self) -> str:
+    async def _get_credential_report(self) -> bytes:
         """Credential Report를 조회
 
         :return: The credentials report.
@@ -156,5 +153,4 @@ class IAMService:
         except ClientError:
             logger.exception("Couldn't get credentials report.")
             raise
-        else:
-            return response["Content"]
+        return response["Content"]
