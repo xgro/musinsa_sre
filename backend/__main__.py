@@ -1,9 +1,9 @@
-from backend.settings import settings
-
 import uvicorn
 
+from backend.settings import settings
 
-def main():
+
+def main() -> None:
     uvicorn.run(
         "backend.web.application:get_app",
         workers=settings.workers_count,

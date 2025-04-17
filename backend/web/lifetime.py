@@ -2,6 +2,8 @@ from typing import Awaitable, Callable
 
 from fastapi import FastAPI
 
+from backend.services.iam.lifetime import init_iam_service
+
 
 def register_startup_event(
     app: FastAPI,
@@ -22,6 +24,9 @@ def register_startup_event(
         # 미들웨어 초기화
         app.middleware_stack = None
         app.middleware_stack = app.build_middleware_stack()
+
+        # iam service 초기화
+        init_iam_service(app)
 
     return _startup
 

@@ -14,7 +14,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from backend.logging import configure_logging
 from backend.settings import settings
 from backend.web.api.router import api_router
-from backend.web.lifetime import register_shutdown_event, register_startup_event
+from backend.web.lifetime import (
+    register_shutdown_event,
+    register_startup_event,
+)
 
 APP_ROOT = Path(__file__).parent.parent
 

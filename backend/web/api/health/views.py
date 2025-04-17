@@ -1,10 +1,12 @@
+from typing import Dict
+
 from fastapi import APIRouter
 
 router = APIRouter()
 
 
 @router.get("/health")
-def health_check():
+def health_check() -> Dict[str, str]:
     """
     Checks the health of a project.
 
