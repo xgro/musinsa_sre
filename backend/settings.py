@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     reload: bool = False
 
     # Current environment
-    environment: str = "dev"
+    environment: str = "local"
 
     log_level: LogLevel = LogLevel.INFO
 
@@ -67,11 +67,9 @@ try:
     env_path = ".env" if not current_env else f".env.{current_env}"
 
     # 환경변수 파일 경로 존재 여부 확인
-    if not Path(env_path).exists():
-        raise ValueError(f"env file not found: {env_path}")
-
-    # 환경변수 파일 로드
-    load_dotenv(dotenv_path=env_path)
+    if Path(env_path).exists():
+        # 환경변수 파일 로드
+        load_dotenv(dotenv_path=env_path)
 
     # 설정 클래스 인스턴스 생성
     settings = Settings()
