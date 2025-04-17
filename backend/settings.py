@@ -6,7 +6,6 @@ from tempfile import gettempdir
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
-
 TEMP_DIR = Path(gettempdir())
 
 
@@ -53,9 +52,6 @@ class Settings(BaseSettings):
     # AWS credentials
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
-
-    # IAM 엑세스키 생성 만료 기준 시간(h)
-    iam_access_key_expiration: int = 24
 
     class Config:
         env_file = ".env"

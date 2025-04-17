@@ -3,4 +3,25 @@ name = "backend"
 version = "0.1.0"
 description = "Backend service for musinsa_sre"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
+dependencies = [
+    "aioboto3>=14.1.0",
+    "fastapi>=0.115.12",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.8.1",
+    "setuptools>=78.1.0",
+    "toml>=0.10.2",
+    "ujson>=5.10.0",
+    "uvicorn>=0.34.1",
+]
+
+[dependency-groups]
+dev = [
+    "autoflake>=2.3.1",
+    "black>=25.1.0",
+    "flake8>=7.2.0",
+    "isort>=6.0.1",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
+    "shed>=2024.10.1",
+]

@@ -1,0 +1,175 @@
+[flake8]
+max-complexity = 6
+inline-quotes = double
+max-line-length = 88
+extend-ignore = E203
+docstring_style=sphinx
+
+ignore =
+  ;WPS360 Found an unnecessary use of a raw string: "(?i)am|pm"
+  WPS360,
+  ;WPS454 Found wrong `raise` exception type: Exception
+  WPS454,
+  ;WPS221 Found line with high Jones Complexity: 17 > 14
+  WPS221,
+  ;D202 No blank lines allowed after function docstring
+  D202,
+  ;WPS211 Found too many arguments: 6 > 5
+  WPS211,
+  ;WPS222 Found a condition with too much logic: 5 > 4
+  WPS222,
+  ;WPS421 Found wrong function call: print
+  WPS421,
+  ;WPS600 Found subclassing a builtin: str
+  WPS600,
+  ;WPS331 Found variables that are only used for `return`: json_result
+  WPS331,
+  ;WPS238 Found too many raises in a function: 4 > 3
+  WPS238,
+  ;WPS336 Found explicit string concatenation
+  WPS336,
+  ;WPS430 Found nested function: replace_match
+  WPS430,
+  ;Found too many expressions: 11 > 9Flake8(WPS213)
+  WPS213,
+  ;Found too many local variables: 10 > 5Flake8(C901)
+  C901,
+  ;Found dotted raw import:
+  WPS301,
+  ;Found function with too much cognitive complexity
+  WPS231,
+  ;Found too deep nesting
+  WPS220,
+  ;Found `noqa` comments overuse: 12
+  WPS402,
+  ;line too long (100 > 88 characters)Flake8(E501)
+  E501,
+  ;Possible hardcoded password: 'super_admin3#'Flake8(S106)
+  S106,
+  ;Found too many local variables: 10 > 5Flake8(WPS210)
+  WPS210,
+  ;Found empty moduleFlake8(WPS411)
+  WPS411
+  ; comments ignore error
+  WPS400,
+  ; Found too short name: e < 2Flake8(WPS111)
+  WPS111,
+  ; Found magic number: 500Flake8(WPS432)
+  WPS432,
+  ; Found a too complex `f` stringFlake8(WPS237)
+  WPS237,
+  ; Found too many imported names from a module: 9 > 8Flake8(WPS235)
+  WPS235,
+  ; First word of the first line should be properly capitalizedFlake8(D403)
+  D403,
+  ; Found commented out codeFlake8(E800)
+  E800,
+  ; Found `f` string
+  WPS305,
+  ; Missing docstring in public module
+  D100,
+  ; Missing docstring in magic method
+  D105,
+  ; Missing docstring in __init__
+  D107,
+  ; Found `__init__.py` module with logic
+  WPS412,
+  ; Found class without a base class
+  WPS306,
+  ; Missing docstring in public nested class
+  D106,
+  ; First line should be in imperative mood
+  D401,
+  ; Found wrong variable name
+  WPS110,
+  ; Found `__init__.py` module with logic
+  WPS326,
+  ; Found string constant over-use
+  WPS226,
+  ; Found upper-case constant in a class
+  WPS115,
+  ; Found nested function
+  WPS602,
+  ; Found method without arguments
+  WPS605,
+  ; Found overused expression
+  WPS204,
+  ; Found too many module members
+  WPS202,
+  ; Found too high module cognitive complexity
+  WPS232,
+  ; line break before binary operator
+  W503,
+  ; Found module with too many imports
+  WPS201,
+  ; Inline strong start-string without end-string.
+  RST210,
+  ; Found nested class
+  WPS431,
+  ; Found wrong module name
+  WPS100,
+  ; Found too many methods
+  WPS214,
+  ; Found too long ``try`` body
+  WPS229,
+  ; Found unpythonic getter or setter
+  WPS615,
+  ; Found a line that starts with a dot
+  WPS348,
+  ; Found complex default value (for dependency injection)
+  WPS404,
+  ;  not perform function calls in argument defaults (for dependency injection)
+  B008,
+  ; Model should define verbose_name in its Meta inner class
+  DJ10,
+  ; Model should define verbose_name_plural in its Meta inner class
+  DJ11,
+  ; Found mutable module constant.
+  WPS407,
+  ; Found too many empty lines in `def`
+  WPS473,
+  ; too many no-cover comments.
+  WPS403,
+
+per-file-ignores =
+  ; all tests
+  test_*.py,tests.py,tests_*.py,*/tests/*,conftest.py:
+  ; Use of assert detected
+  S101,
+  ; Found outer scope names shadowing
+  WPS442,
+  ; Found too many local variables
+  WPS210,
+  ; Found magic number
+  WPS432,
+  ; Missing parameter(s) in Docstring
+  DAR101,
+  ; Found too many arguments
+  WPS211,
+
+  ; all init files
+  __init__.py:
+  ; ignore not used imports
+  F401,
+  ; ignore import with wildcard
+  F403,
+  ; Found wrong metadata variable
+  WPS410,
+
+exclude =
+  ./.cache,
+  ./.git,
+  ./.idea,
+  ./.mypy_cache,
+  ./.pytest_cache,
+  ./.venv,
+  ./venv,
+  ./env,
+  ./cached_venv,
+  ./docs,
+  ./deploy,
+  ./var,
+  ./.vscode,
+  ./streamlit,
+  streamlit,
+  *migrations*,
