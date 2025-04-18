@@ -95,7 +95,9 @@ class IAMService:
             for idx in [1, 2]:
                 # access_key가 비활성화되어 있으면 루프 패스
                 if row[f"access_key_{idx}_active"] != "true":
-                    logger.info(f"Access key {idx} is not active for user {user_name}.")
+                    logger.debug(
+                        f"Access key {idx} is not active for user {user_name}.",
+                    )
                     continue
 
                 # access_key가 마지막으로 생성된 시간을 조회
