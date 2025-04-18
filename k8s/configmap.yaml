@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: musinsa-config
+data:
+  MUSINSA_SRE_ENVIRONMENT: "local"
+  MUSINSA_SRE_LOG_LEVEL: "INFO" # NOTSET, DEBUG, INFO, WARNING, ERROR, FATAL

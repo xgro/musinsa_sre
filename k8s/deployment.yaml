@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: musinsa-sre-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: musinsa-sre-backend
+  template:
+    metadata:
+      labels:
+        app: musinsa-sre-backend
+    spec:
+      containers:
+      - name: backend
+        image: musinsa-sre-backend:latest
+        imagePullPolicy: Never # Minikube 환경에서는 Never로 설정
+        ports:
+        - containerPort: 8000
+          name: target-port
+        envFrom:
+        - configMapRef:
+            name: musinsa-config
+        - secretRef:
+            name: musinsa-secret
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: target-port
+          failureThreshold: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: target-port
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: target-port
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 1Gi
+        lifecycle:
+          preStop:
+            exec:
+              command: [ "/bin/sh", "-c", "sleep 40" ]
+      terminationGracePeriodSeconds: 60
