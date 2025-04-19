@@ -49,13 +49,12 @@ class Settings(BaseSettings):
     # cors origins
     cors_origins: str = ""
 
-    # AWS credentials
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
 
     class Config:
         env_file = ".env"
-        env_prefix = "MUSINSA_SRE_"
+        # env_prefix = "MUSINSA_SRE_"
         env_file_encoding = "utf-8"
 
 
@@ -73,5 +72,6 @@ try:
 
     # 설정 클래스 인스턴스 생성
     settings = Settings()
+
 except Exception as e:
     raise e

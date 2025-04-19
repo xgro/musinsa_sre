@@ -7,7 +7,6 @@ import aioboto3  # type: ignore
 from botocore.exceptions import ClientError
 from loguru import logger
 
-from backend.settings import settings
 from backend.web.api.iam.schema import OldAccessKey
 
 
@@ -17,10 +16,7 @@ class IAMService:
 
         :return: None
         """
-        self.session = aioboto3.Session(
-            aws_access_key_id=settings.aws_access_key_id,
-            aws_secret_access_key=settings.aws_secret_access_key,
-        )
+        self.session = aioboto3.Session()
 
     async def get_old_access_keys_from_list_users(
         self,
