@@ -27,28 +27,37 @@ class IAMService:
         :param hours: 조회할 시간
         :return: 조회된 Access Key 목록
         """
-        async with self.session.client("iam") as client:  # type: ignore
-            paginator = client.get_paginator("list_users")
+        try:
+            async with self.session.client("iam") as client:  # type: ignore
+                paginator = client.get_paginator("list_users")
 
-            users = []
-            async for page_obj in paginator.paginate():
-                users.extend(page_obj["Users"])
+                users = []
+                async for page_obj in paginator.paginate():
+                    users.extend(page_obj["Users"])
 
-            old_keys = []
-            threshold = datetime.now(timezone.utc) - timedelta(hours=hours)
-            for user in users:
-                access_keys = await client.list_access_keys(UserName=user["UserName"])
-                for key in access_keys["AccessKeyMetadata"]:
-                    if key["CreateDate"] < threshold:
-                        old_keys.append(
-                            OldAccessKey(
-                                user_name=user["UserName"],
-                                access_key_id=key["AccessKeyId"],
-                                created_date=key["CreateDate"],
-                            ),
-                        )
+                # 임계값 설정
+                threshold = datetime.now(timezone.utc) - timedelta(hours=hours)
 
-            return old_keys
+                # 유저 목록 조회
+                old_keys = []
+                for user in users:
+                    access_keys = await client.list_access_keys(
+                        UserName=user["UserName"],
+                    )
+                    for key in access_keys["AccessKeyMetadata"]:
+                        if key["CreateDate"] < threshold:
+                            old_keys.append(
+                                OldAccessKey(
+                                    user_name=user["UserName"],
+                                    access_key_id=key["AccessKeyId"],
+                                    created_date=key["CreateDate"],
+                                ),
+                            )
+
+                return old_keys
+        except ClientError:
+            logger.exception("Couldn't get access keys from list users.")
+            raise
 
     async def get_old_access_keys_from_credential_report(
         self,
@@ -59,9 +68,18 @@ class IAMService:
         :param hours: 조회할 시간
         :return: 조회된 Access Key 목록
         """
-        await self._generate_credential_report()
-        credential_report = await self._get_credential_report()
-        return self._parse_credential_report(credential_report, hours)
+        try:
+            # 자격 증명 보고서 생성
+            await self._generate_credential_report()
+
+            # 자격 증명 보고서 조회
+            credential_report = await self._get_credential_report()
+
+            # 자격 증명 보고서 파싱
+            return self._parse_credential_report(credential_report, hours)
+        except Exception:
+            logger.exception("Couldn't get access keys from credential report.")
+            raise
 
     def _parse_credential_report(
         self,
