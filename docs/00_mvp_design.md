@@ -42,9 +42,13 @@ graph LR
 
 ### 4.2 AWS IAM 인터페이스
 
-- aioboto3 세션을 서비스 클래스에서 통합 관리
+- aioboto3 세션을 서비스 클래스에서 **싱글톤(1회 생성, 재사용)**으로 통합 관리
+- **비동기 락(asyncio.Lock)**을 활용해 멀티코어 환경에서도 중복 생성 방지
+- **세마포어(asyncio.Semaphore)**로 IAM API 동시 호출 개수 제한(기본 5)
+- 서비스 종료 `shutdown` 시 `await iam_service.close()`로 자원 해제 명시
 - Access Key 생성 시간 조회 및 필터링 로직
 - Credential Report 기반 대량 Access Key 조회 기능 (Rate Limit 걱정 없음)
+- 유저별 액세스 키 조회는 **asyncio.gather**로 병렬 처리
 
 ### 4.3 설정 관리
 
@@ -97,13 +101,25 @@ graph LR
 }
 ```
 
+#### 주요 서비스 클래스 사용 예시
+
+```python
+from backend.services.iam.service import IAMService
+
+iam_service = IAMService()
+old_keys = await iam_service.get_old_access_keys_from_list_users(hours=24)
+# ...
+await iam_service.close()  # 서비스 종료 시 반드시 호출
+```
+
 ## 6. 구현 계획
 
 ### 6.1 백엔드 구현
 
 1. FastAPI 기반 비동기 API 서버 구현
-2. aioboto3를 활용한 AWS IAM 비동기 연동
-3. 타임아웃, 예외 처리, 입력 검증 등 견고한 서비스 구현
+2. aioboto3를 활용한 AWS IAM **비동기 + 싱글톤** 연동
+3. **동시성 제어(세마포어), 병렬 처리(asyncio.gather)** 적용
+4. 타임아웃, 예외 처리, 입력 검증 등 견고한 서비스 구현
 
 ### 6.2 인프라 구현
 
@@ -145,10 +161,11 @@ backend/
 1. 애플리케이션 로깅
    - 구조화된 JSON 로그 형식 (loguru 등)
    - 로그 레벨 설정
+2. IAMService의 동시성/자원 관리 상태 모니터링(선택)
 
 ---
 
-비동기 처리와 AWS Credential Report 활용을 통해, 대량의 사용자와 Access Key를 효율적으로 처리할 수 있는 구조를 갖추는 것이 본 시스템의 핵심입니다.
+비동기 처리, **싱글톤 클라이언트/락/세마포어/병렬 처리**와 AWS Credential Report 활용을 통해, 대량의 사용자와 Access Key를 효율적으로 처리할 수 있는 구조를 갖추는 것이 본 시스템의 핵심입니다.
 
 ## AWS API 페이지네이션 및 Credential Report 처리 설계
 

@@ -43,6 +43,10 @@ def register_shutdown_event(
 
     @app.on_event("shutdown")
     async def _shutdown() -> None:  # noqa: WPS430
-        pass  # noqa: WPS420
+        """
+        IAMService 종료
+        """
+        if app.state.iam_service:
+            await app.state.iam_service.close()
 
     return _shutdown

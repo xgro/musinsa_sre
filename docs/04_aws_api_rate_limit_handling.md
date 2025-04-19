@@ -33,7 +33,10 @@ AWS IAM API는 계정 및 리전별로 **공식적인 요청 제한(TPS)이 명�
 
 - **GET /v1/iam/old-access-keys/list-users** 엔드포인트는 실시간 AWS API 호출 기반
 - 대량 데이터 환경에서는 호출 속도를 제한하거나, Throttling 발생 시 Exponential Backoff(점진적 재시도) 적용
-- 동시에 너무 많은 사용자에 대해 API를 호출하지 않도록 동시 실행 개수 제한(Semaphore 등) 적용
+- 동시에 너무 많은 사용자에 대해 API를 호출하지 않도록 **동시 실행 개수 제한(Semaphore 등) 적용**
+- 실제 구현에서는 **싱글톤 aioboto3 클라이언트 + 비동기 락 + 세마포어** 구조로 동시성/자원 관리
+- 서비스 종료 `shutdown` 시 `await iam_service.close()`로 자원 해제 명시
+- 유저별 액세스 키 조회는 **asyncio.gather**로 병렬 처리
 
 ---
 
@@ -42,6 +45,7 @@ AWS IAM API는 계정 및 리전별로 **공식적인 요청 제한(TPS)이 명�
 - 대량 데이터 환경에서는 Credential Report 기반 엔드포인트 사용을 우선 권장
 - 실시간성이 반드시 필요한 경우에만 실시간 API + 속도 제한/재시도/동시성 제어 적용
 - 서비스 구조상 두 방식을 분리 제공하여, 상황에 따라 선택적으로 활용 가능
+- **IAMService는 싱글톤 클라이언트, 비동기 락, 세마포어, 병렬 처리, 자원 해제(close) 구조를 갖춤**
 
 ---
 
@@ -54,5 +58,5 @@ AWS IAM API는 계정 및 리전별로 **공식적인 요청 제한(TPS)이 명�
 ## 5. 결론
 
 - Credential Report 기반 방식은 Rate Limit 문제를 근본적으로 회피하며, 대량 데이터 환경에 적합
-- 실시간 API는 속도 제한, 재시도(Exponential Backoff), 동시성 제어를 통해 안정적인 서비스 운영이 가능
+- 실시간 API는 속도 제한, 재시도(Exponential Backoff), **동시성 제어(세마포어), 병렬 처리, 자원 해제(close)**를 통해 안정적인 서비스 운영이 가능
 - 실제 구현 구조에 맞춰 두 방식을 분리 제공함
