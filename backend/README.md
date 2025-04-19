@@ -55,15 +55,6 @@ python -m backend
 cp .env.sample .env
 ```
 
-### AWS 크레덴셜 환경변수 설계 의도
-
-- AWS SDK는 기본적으로 `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` 환경변수를 자동 인식합니다.
-- 본 프로젝트에서는 서비스 구분 및 환경별 충돌 방지를 위해
-  `MUSINSA_SRE_AWS_ACCESS_KEY_ID`, `MUSINSA_SRE_AWS_SECRET_ACCESS_KEY`와 같이 커스텀 환경변수명을 사용하였습니다.
-- 코드에서는 이 커스텀 환경변수를 읽어 AWS SDK에 명시적으로 전달하도록 설계하였습니다.
-- 이를 통해, 여러 서비스가 동일한 인프라 환경에서 동작할 때 변수 충돌을 방지하고,
-  운영/보안 정책에 유연하게 대응할 수 있습니다.
-
 ## 라이선스
 
 MIT License

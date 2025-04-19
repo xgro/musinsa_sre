@@ -6,9 +6,9 @@
 - **실시간 API는 Rate Limit(TPS, 초당 요청 수)에 주의해야 하며, 대량 환경에서는 Credential Report 기반 방식을 권장합니다.**
 - **두 엔드포인트 모두 `hours` 파라미터로 만료 기준 시간(시간 단위)을 지정합니다.**
 - **Swagger(OpenAPI) 문서:**
-  - 브라우저에서 [http://localhost:8000/api/docs](http://localhost:8000/api/docs) 접속 시, 모든 엔드포인트의 스펙과 테스트가 가능합니다.
+  - 브라우저에서 `예시) http://localhost:8000/api/docs` 접속 시, 모든 엔드포인트의 스펙과 테스트가 가능합니다.
   - Swagger 접속 시, ID/PW 입력이 필요합니다. (기본값: musinsa_sre / musinsa123!@#)
-  - ID와 PW는 환경변수(`MUSINSA_SRE_SWAGGER_ID`, `MUSINSA_SRE_SWAGGER_PASSWORD`)로 설정할 수 있습니다.
+  - ID와 PW는 환경변수(`SWAGGER_ID`, `SWAGGER_PASSWORD`)로 설정할 수 있습니다.
 
 ---
 

@@ -77,7 +77,7 @@ AWS IAM Access Key의 보안 위험을 사전에 식별하고 관리할 수 있�
 - **Swagger(OpenAPI) 문서:**
   - 브라우저에서 `예시) http://localhost:8000/api/docs` 접속 시, 모든 엔드포인트의 스펙과 테스트가 가능합니다.
   - Swagger 접속 시, ID/PW 입력이 필요합니다. (기본값: musinsa_sre / musinsa123!@#)
-  - ID와 PW는 환경변수(`MUSINSA_SRE_SWAGGER_ID`, `MUSINSA_SRE_SWAGGER_PASSWORD`)로 설정할 수 있습니다.
+  - ID와 PW는 환경변수(`SWAGGER_ID`, `SWAGGER_PASSWORD`)로 설정할 수 있습니다.
 
 자세한 사용법 및 예시는 [docs/03_endpoint_usage_guide.md](docs/03_endpoint_usage_guide.md) 참고
 

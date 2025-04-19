@@ -24,8 +24,8 @@
 
 ```bash
 docker run -it --rm \
-  -e MUSINSA_SRE_AWS_ACCESS_KEY_ID=your_access_key \
-  -e MUSINSA_SRE_AWS_SECRET_ACCESS_KEY=your_secret_key \
+  -e AWS_ACCESS_KEY_ID=your_access_key \
+  -e AWS_SECRET_ACCESS_KEY=your_secret_key \
   myimage:latest
 ```
 
@@ -63,8 +63,8 @@ docker run --env-file .env myimage:latest
 
 ```dockerfile
 # 아래와 같이 Dockerfile에 민감 정보를 직접 선언하지 마세요!
-ENV MUSINSA_SRE_AWS_ACCESS_KEY_ID=your_access_key
-ENV MUSINSA_SRE_AWS_SECRET_ACCESS_KEY=your_secret_key
+ENV AWS_ACCESS_KEY_ID=your_access_key
+ENV AWS_SECRET_ACCESS_KEY=your_secret_key
 ```
 
 ---
