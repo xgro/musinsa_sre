@@ -25,8 +25,10 @@ COPY pyproject.toml uv.lock ./
 # Configuring uv & installing requirements
 RUN uv sync --frozen --no-install-project --no-dev
 
-COPY . /app
+# 프로젝트 코드 복사
+COPY /backend /app/backend
 
+# 프로젝트 패키지 설치
 RUN uv sync --frozen --no-dev
 
 # 실행용 이미지
