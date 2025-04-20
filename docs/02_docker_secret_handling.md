@@ -83,3 +83,61 @@ ENV AWS_SECRET_ACCESS_KEY=your_secret_key
 - **이미지에는 민감 정보가 없어야 함!**
 - **컨테이너 실행 시점에만 환경변수로 주입!**
 - **Secret 관리 기능을 적극 활용!**
+
+---
+
+## 6. 실전 Docker 빌드/실행 검증 가이드
+
+### 1) Docker 이미지 빌드
+
+```bash
+docker build -t myimage:latest .
+```
+
+### 2) 이미지 내 시크릿 미포함 검증
+
+- 빌드된 이미지에 시크릿이 포함되지 않았는지 반드시 확인하세요.
+- 예시: 이미지 내 환경변수/파일에 시크릿이 없는지 검사
+
+```bash
+docker run --rm myimage:latest env | grep AWS
+# (아무것도 출력되지 않아야 안전)
+```
+
+- 또는 이미지 내 파일 시스템 검사
+
+```bash
+docker run --rm myimage:latest find / -type f | grep -i env
+# .env 등 민감 파일이 없어야 함
+```
+
+### 3) 환경변수/시크릿 주입 후 실행 검증
+
+```bash
+docker run --rm -e AWS_ACCESS_KEY_ID=your_access_key -e AWS_SECRET_ACCESS_KEY=your_secret_key myimage:latest
+```
+
+또는
+
+```bash
+docker run --rm --env-file .env myimage:latest
+```
+
+### 4) Kubernetes 연동 시 검증
+
+- Secret 리소스 생성 및 Pod에 환경변수로 주입
+- 실제 Pod 내에서 시크릿이 잘 주입되는지, 이미지에는 포함되지 않는지 확인
+
+```bash
+kubectl exec -it <pod-name> -- env | grep AWS
+# (실행 중인 컨테이너에서만 시크릿이 노출되어야 함)
+```
+
+### 5) CI/CD 파이프라인에서 검증
+
+- 빌드/배포 파이프라인에서 시크릿이 로그/이미지에 노출되지 않는지 점검
+- 필요시 BuildKit의 --secret, GitHub Actions의 secret masking 등 활용
+
+---
+
+**실제 운영 전, 이미지와 런타임 환경 모두에서 시크릿 노출 여부를 반드시 검증하세요!**

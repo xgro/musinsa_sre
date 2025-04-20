@@ -125,3 +125,77 @@ minikube image load <이미지 이름>
 이미지는 Minikube VM 내부에 있기 때문에 따로 `imagePullPolicy`를 `Never`로 설정하는 것도 고려해야 합니다.
 
 ---
+
+## 7. 실전 배포 및 시크릿/환경변수 검증 절차 (Minikube)
+
+아래 절차는 실제 deployment.yaml의 이미지 태그(`musinsa-sre-backend:latest`)를 기준으로, Minikube 환경에서 빌드, 배포, 시크릿/환경변수 주입 및 검증까지 실무적으로 따라할 수 있는 가이드입니다.
+
+### 1) Minikube Docker 환경으로 전환
+
+```bash
+eval $(minikube docker-env)
+```
+
+### 2) Docker 이미지 빌드 (deployment.yaml의 이미지 태그와 일치시켜야 함)
+
+```bash
+docker build -t musinsa-sre-backend:latest .
+```
+
+### 3) (필요시) 이미지 강제 로드
+
+```bash
+minikube image load musinsa-sre-backend:latest
+```
+
+### 4) 시크릿 설정 및 리소스 배포
+
+```bash
+# 제공된 샘플 파일을 복사하여 민감 정보 입력
+cp secret.yaml.sample secret.yaml
+
+# 민감 정보는 다음과 같이 base64 인코딩한 값을 입력
+# 예시)
+echo -n 'your_secret_key' | base64
+
+# 리소스 배포
+kubectl apply -f k8s/
+```
+
+### 5) Pod 상태 및 서비스 확인
+
+```bash
+kubectl get pods
+kubectl get svc musinsa-sre-backend
+```
+
+### 6) Pod 내 환경변수/시크릿 주입 검증
+
+```bash
+kubectl exec -it <pod-name> -- env | grep AWS
+# (여기서만 시크릿이 노출되어야 하며, 이미지에는 포함되지 않아야 함)
+```
+
+### 7) Pod 내 파일 시스템에 시크릿/민감 정보 미포함 검증
+
+```bash
+kubectl exec -it <pod-name> -- find / -type f | grep -i env
+# .env 등 민감 파일이 없어야 함
+```
+
+### 8) 서비스 정상 동작 확인
+
+```bash
+# 서비스 포트 포워딩
+kubectl port-forward svc/musinsa-sre-backend 8000:8000
+
+# 서비스 정상 동작 확인
+curl http://localhost:8000/api/health
+```
+
+---
+
+**Tip:**
+
+- 이미지 태그(`musinsa-sre-backend:latest`)는 deployment.yaml과 반드시 일치해야 하며, Minikube 환경에서는 `imagePullPolicy: Never`로 설정되어 있어야 합니다.
+- 위 절차를 통해 실제 배포 환경에서 시크릿/환경변수 주입 및 이미지 내 민감 정보 미포함 여부를 안전하게 검증할 수 있습니다.
