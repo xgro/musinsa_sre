@@ -1,5 +1,7 @@
 # Musinsa SRE 과제
 
+<img alt="gitleaks badge" src="https://img.shields.io/badge/protected%20by-gitleaks-blue">
+
 ## 1. 프로젝트 개요
 
 AWS IAM Access Key의 보안 위험을 사전에 식별하고 관리할 수 있도록 설계된 백엔드 시스템입니다.
@@ -108,6 +110,18 @@ AWS IAM Access Key의 보안 위험을 사전에 식별하고 관리할 수 있�
 - pre-commit이 설치되어 있지 않다면 `pip install pre-commit` 후, `pre-commit install`로 활성화하세요.
 
 이미 커밋된 민감정보는 git history에서 완전히 제거해야 하며, pre-commit hook은 새로운 커밋에 대해서만 동작합니다.
+
+## 7-2. 보안: 민감정보 노출 방지
+
+본 프로젝트는 민감정보 노출 방지를 위해 [gitleaks](https://github.com/gitleaks/gitleaks) 기반의 GitHub Actions를 적용하고 있습니다.
+
+- `.github/workflows/gitleaks.yml`에 `gitleaks`가 등록되어 있습니다.
+
+- Triggers
+  - `push`: 소스코드가 레포지토리에 푸시될 때, 민감정보가 노출되어 있는지 검사합니다.
+  - `pull_request`: 풀 리퀘스트 시, 민감정보가 노출되어 있는지 검사합니다.
+  - `workflow_dispatch`: 수동 실행 시, 민감정보가 노출되어 있는지 검사합니다.
+  - `schedule`: 매일 4시에 실행되며 민감정보가 노출되어 있는지 검사합니다.
 
 ---
 
