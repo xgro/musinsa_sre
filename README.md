@@ -99,6 +99,18 @@ AWS IAM Access Key의 보안 위험을 사전에 식별하고 관리할 수 있�
 
 ---
 
+## 7-1. 보안: 커밋 시 민감정보(크레덴셜) 노출 방지
+
+본 프로젝트는 개발자가 실수로 시크릿, API 키, 비밀번호 등 민감정보를 커밋하는 것을 방지하기 위해 [detect-secrets](https://github.com/Yelp/detect-secrets) 기반의 pre-commit hook을 적용하고 있습니다.
+
+- 커밋 단계에서 자동으로 코드 내 민감정보 패턴을 검사하며, 시크릿이 감지되면 커밋이 차단됩니다.
+- `.pre-commit-config.yaml`에 detect-secrets가 등록되어 있습니다.
+- pre-commit이 설치되어 있지 않다면 `pip install pre-commit` 후, `pre-commit install`로 활성화하세요.
+
+이미 커밋된 민감정보는 git history에서 완전히 제거해야 하며, pre-commit hook은 새로운 커밋에 대해서만 동작합니다.
+
+---
+
 ## 8. 문서/참고자료
 
 - [docs/00_mvp_design.md](docs/00_mvp_design.md) : 전체 시스템 설계 및 구조

@@ -23,6 +23,11 @@ repos:
 #     - --preserve-quotes
 #     - --indent=2
 
+- repo: https://github.com/Yelp/detect-secrets
+  rev: v1.4.0
+  hooks:
+  - id: detect-secrets
+
 - repo: local
   hooks:
   - id: autoflake
