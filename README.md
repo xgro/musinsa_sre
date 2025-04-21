@@ -43,7 +43,7 @@ AWS IAM Access Key의 보안 위험을 사전에 식별하고 관리할 수 있�
    cd musinsa_sre
    uv venv
    source .venv/bin/activate
-   uv pip install -e .
+   uv sync
    ```
 
 2. **환경 변수 설정**
